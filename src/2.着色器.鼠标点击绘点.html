@@ -1,0 +1,72 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="../lib/cuon-utils.js"></script>
+    <script src="../lib/webgl-debug.js"></script>
+    <script src="../lib/webgl-utils.js"></script>
+    <script>
+      const Vshader_source = `
+        // 声明变量 attribute: 只有定点着色器可以使用
+        attribute vec4 a_Position;
+        attribute float a_Size;
+        void main() {
+          gl_Position = a_Position;
+          gl_PointSize = a_Size;
+        }
+      `
+
+      const FShader_source = `
+        void main() {
+          gl_FragColor = vec4(1.0,0.0,0.0,1.0);
+        }
+      `
+      function main() {
+        console.log('load')
+        const canvas = document.querySelector('#canvas');
+        const gl = getWebGLContext(canvas);
+        if(!initShaders(gl, Vshader_source, FShader_source)){
+          return
+        }
+
+        // 1, 获取attribute的存储位置
+        const a_Position = gl.getAttribLocation(gl.program, 'a_Position')
+        const a_Size = gl.getAttribLocation(gl.program, 'a_Size')
+        // 2, 向变量赋值
+        gl.vertexAttrib1f(a_Size,10)
+
+        const g_points = []
+
+        gl.clearColor(0.0,0.0,0.0,1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT)
+        // 3, 注册鼠标事件
+        canvas.onmousedown = function(e) {
+          const x = e.clientX;
+          const y = e.clientY;
+          // 坐标映射
+          const rect = e.target.getBoundingClientRect()
+          const realX = ((x-rect.left) - canvas.height / 2)/(canvas.height / 2);
+          const realY = (canvas.width /2 - (y - rect.top))/ (canvas.width/ 2);
+          // 存储点击的点
+          g_points.push([realX, realY])
+          // 清除canvas： 每次drawArrays后颜色缓冲区就会被（0，0，0，0）颜色重置
+          gl.clear(gl.COLOR_BUFFER_BIT)
+
+          g_points.forEach(([x, y]) => {
+            gl.vertexAttrib3f(a_Position, x, y, 0.0)
+            // 4，画出来
+            gl.drawArrays(gl.POINTS, 0, 1)
+          })
+        }
+      }
+
+    </script>
+  </head>
+  <body onload="main()">
+    <canvas id="canvas" width="400" height="400"></canvas>
+  </body>
+</html>
