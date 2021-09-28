@@ -1,0 +1,87 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="../lib/cuon-utils.js"></script>
+    <script src="../lib/webgl-debug.js"></script>
+    <script src="../lib/webgl-utils.js"></script>
+    <script>
+      const Vshader_source = `
+        // 声明变量 attribute: 只有定点着色器可以使用
+        attribute vec4 a_Position;
+        attribute float a_PointSize;
+        void main() {
+          gl_Position = a_Position;
+          gl_PointSize = a_PointSize;
+        }
+      `
+
+      const FShader_source = `
+        void main() {
+          gl_FragColor = vec4(1.0,1.0,0.0,1.0);
+        }
+      `
+      function main() {
+        console.log('load')
+        const canvas = document.querySelector('#canvas');
+        const gl = getWebGLContext(canvas);
+        if(!initShaders(gl, Vshader_source, FShader_source)){
+          return
+        }
+
+        const n = initVertexBuffers(gl)
+
+        gl.clearColor(0.0,0.0,0.0,1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT)
+
+        gl.drawArrays(gl.POINTS, 0, n)
+      }
+
+      function initVertexBuffers(gl) {
+        const vertices = new Float32Array([
+          0.0, 0.5, 10.0,
+          -0.5, -0.5, 20.0, 
+          0.5, -0.5, 30.0
+        ]);
+        const n = 3; // The number of vertices
+
+        // 1, 创建缓冲区对象
+        const vertexBuffer = gl.createBuffer();
+        if (!vertexBuffer) {
+          console.log('Failed to create the buffer object');
+          return -1;
+        }
+        // 2, 绑定缓冲区对象
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+        // 3, 将数据写入缓冲区对象
+        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+        const a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+        const a_PointSize = gl.getAttribLocation(gl.program, 'a_PointSize');
+
+        if (a_Position < 0 || a_PointSize < 0) {
+          console.log('Failed to get the storage location');
+          return -1;
+        }
+        // 4, 将缓冲区对象分配给attribute变量
+        gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, vertices.BYTES_PER_ELEMENT * 3, 0);
+        // 5， 开启attribute变量
+        gl.enableVertexAttribArray(a_Position);
+
+        // size
+        gl.vertexAttribPointer(a_PointSize, 1, gl.FLOAT, false, vertices.BYTES_PER_ELEMENT * 3, vertices.BYTES_PER_ELEMENT * 2);
+        gl.enableVertexAttribArray(a_PointSize);
+
+        return n;
+      }
+
+    </script>
+  </head>
+  <body onload="main()">
+    <canvas id="canvas" width="200" height="200"></canvas>
+  </body>
+</html>
