@@ -1,0 +1,121 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="../lib/cuon-utils.js"></script>
+    <script src="../lib/webgl-debug.js"></script>
+    <script src="../lib/webgl-utils.js"></script>
+    <script>
+      const Vshader_source = `
+        // 声明变量 attribute: 只有定点着色器可以使用
+        attribute vec4 a_Position;
+        attribute vec2 a_TexCoord;
+        varying vec2 v_TexCoord;
+        void main() {
+          gl_Position = a_Position;
+          v_TexCoord = a_TexCoord;
+        }
+      `
+
+      const FShader_source = `
+        precision mediump float;
+        varying vec2 v_TexCoord;
+        uniform sampler2D u_Sampler;
+        void main() {
+          gl_FragColor = texture2D(u_Sampler, v_TexCoord);
+        }
+      `
+      function main() {
+        console.log('load')
+        const canvas = document.querySelector('#canvas');
+        const gl = getWebGLContext(canvas);
+        if(!initShaders(gl, Vshader_source, FShader_source)){
+          return
+        }
+
+        const n = initVertexBuffers(gl)
+
+
+        if(!initTextures(gl, n)){
+          return
+        }
+
+        gl.clearColor(0.0,0.0,0.0,1.0);
+      }
+
+      function initVertexBuffers(gl) {
+        const vertices = new Float32Array([
+          -0.5,0.5,    0.0,1.0,
+          -0.5,-0.5,   0.0,0.0,
+          0.5,0.5,     1.0,1.0,
+          0.5,-0.5,    1.0,0.0,
+        ]);
+        const n = 4; // The number of vertices
+
+        // 1, 创建缓冲区对象
+        const vertexBuffer = gl.createBuffer();
+        if (!vertexBuffer) {
+          console.log('Failed to create the buffer object');
+          return -1;
+        }
+        // 2, 绑定缓冲区对象
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+        // 3, 将数据写入缓冲区对象
+        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+        const a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+        // 纹理坐标
+        const a_TexCoord = gl.getAttribLocation(gl.program, 'a_TexCoord');
+        if (a_Position < 0) {
+          console.log('Failed to get the storage location of a_Position');
+          return -1;
+        }
+        // 4, 将缓冲区对象分配给attribute变量
+        gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, vertices.BYTES_PER_ELEMENT * 4, 0);
+        gl.vertexAttribPointer(a_TexCoord, 2, gl.FLOAT, false, vertices.BYTES_PER_ELEMENT * 4, vertices.BYTES_PER_ELEMENT * 2);
+        // 5， 开启attribute变量
+        gl.enableVertexAttribArray(a_Position);
+        gl.enableVertexAttribArray(a_TexCoord);
+
+        return n;
+      }
+
+      function initTextures(gl,n) {
+          // 创建纹理对象
+
+          const texture = gl.createTexture();
+          const u_Sampler = gl.getUniformLocation(gl.program, 'u_Sampler');
+          const image = new Image();
+          image.src = '../assets/leimu_128*128.jpg';
+          image.onload = function() {
+            console.log('imageload');
+            // 图像y轴反转: 图片坐标系统与webGL纹理坐标系统y轴方向是相反的
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1)
+            // 激活纹理单元
+            gl.activeTexture(gl.TEXTURE0);
+            // 绑定纹理对象 ： gl.TEXTURE_2D 二维纹理
+            gl.bindTexture(gl.TEXTURE_2D, texture)
+            // 配置纹理对象的参数
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            // 纹理图像分配给纹理对象
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+            // 纹理单元传递给片元着色器
+            gl.uniform1i(u_Sampler, 0)
+
+            gl.clear(gl.COLOR_BUFFER_BIT);   // Clear <canvas>
+
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, n); // Draw the rectangle
+          }
+          return true
+      }
+
+    </script>
+  </head>
+  <body onload="main()">
+    <canvas id="canvas" width="200" height="200"></canvas>
+  </body>
+</html>
