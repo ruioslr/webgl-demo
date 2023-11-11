@@ -49,10 +49,14 @@
 
       function initVertexBuffers(gl) {
         const vertices = new Float32Array([
-          -0.5,0.5,    0.0,1.0,
-          -0.5,-0.5,   0.0,0.0,
-          0.5,0.5,     1.0,1.0,
-          0.5,-0.5,    1.0,0.0,
+          // -0.5,0.5,    0.0,1.0,
+          // -0.5,-0.5,   0.0,0.0,
+          // 0.5,0.5,     1.0,1.0,
+          // 0.5,-0.5,    1.0,0.0,
+          -0.5,0.5,    -0.3,1.7,
+          -0.5,-0.5,   -0.3,-0.2,
+          0.5,0.5,     1.7,1.7,
+          0.5,-0.5,    1.7,-0.2,
         ]);
         const n = 4; // The number of vertices
 
@@ -90,7 +94,7 @@
           const texture = gl.createTexture();
           const u_Sampler = gl.getUniformLocation(gl.program, 'u_Sampler');
           const image = new Image();
-          image.src = '../assets/leimu_128*128.jpg';
+          image.src = '../assets/sky.jpeg';
           image.onload = function() {
             console.log('imageload');
             // 图像y轴反转: 图片坐标系统与webGL纹理坐标系统y轴方向是相反的

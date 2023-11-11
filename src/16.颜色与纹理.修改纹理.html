@@ -90,7 +90,7 @@
           const texture = gl.createTexture();
           const u_Sampler = gl.getUniformLocation(gl.program, 'u_Sampler');
           const image = new Image();
-          image.src = '../assets/leimu_128*128.jpg';
+          image.src = '../assets/sky.jpeg';
           image.onload = function() {
             console.log('imageload');
             // 图像y轴反转: 图片坐标系统与webGL纹理坐标系统y轴方向是相反的
