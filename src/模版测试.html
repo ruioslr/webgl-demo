@@ -135,7 +135,7 @@
         gl.uniformMatrix4fv(projectionLoc, false, projection);
         gl.uniform3f(colorLoc, 1.0, 0.0, 0.0); // 物体颜色
 
-        gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+        gl.drawElements(gl.LINE_LOOP, indices.length, gl.UNSIGNED_SHORT, 0);
 
         // --- 第二次渲染（绘制外框）---
         gl.useProgram(outlineProgram);
@@ -152,7 +152,7 @@
         // 禁用深度测试，避免外框被物体遮挡
         gl.disable(gl.DEPTH_TEST);
 
-        gl.drawElements(gl.LINES, indices.length, gl.UNSIGNED_SHORT, 0);
+        gl.drawElements(gl.LINE_LOOP, indices.length, gl.UNSIGNED_SHORT, 0);
 
         // 重新启用深度测试，避免影响后续渲染
         gl.stencilMask(0xFF); // 禁用模板缓冲区写入
