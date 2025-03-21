@@ -71,11 +71,11 @@
 
 
 
-            modelMatrix.setTranslate(0.75,0,0)
+            modelMatrix.setTranslate(0.5,0,0)
             gl.uniformMatrix4fv(u_mpvMatrix, false, new Matrix4().multiply(projMatrix).multiply(viewMatrix).multiply(modelMatrix).elements);
             gl.drawArrays(gl.TRIANGLES, 0, n);
 
-            modelMatrix.setTranslate(-0.75,0,0)
+            modelMatrix.setTranslate(-0.5,0,0)
             gl.uniformMatrix4fv(u_mpvMatrix, false, new Matrix4().multiply(projMatrix).multiply(viewMatrix).multiply(modelMatrix).elements);
             gl.drawArrays(gl.TRIANGLES, 0, n);
 
